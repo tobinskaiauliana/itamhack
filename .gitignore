@@ -1,0 +1,4 @@
+jwt_secret.txt
+__pycache__/
+.venv/
+uploads/
