@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
-from models import TelegramCode, User
+from models import TelegramCode, User, LanguageEnum, LevelEnum
 
 class AuthService:
     @staticmethod
@@ -59,22 +59,106 @@ class AuthService:
         if not user:
             user = User(
                 telegram_id=auth_code.telegram_id,
-                username=auth_code.telegram_username,
-                first_name=auth_code.telegram_first_name
+                telegram_username=auth_code.telegram_username,
+                name=auth_code.telegram_first_name,
+                language=LanguageEnum.rus,
+                level=LevelEnum.n
             )
             db.add(user)
 
         auth_code.is_used = True
         db.commit()
+        db.refresh(user)
 
         return {
             "success": True,
             "user_id": user.id,
             "telegram_id": user.telegram_id,
-            "username": user.username,
-            "first_name": user.first_name
+            "username": user.telegram_username,
+            "name": user.name,
+            "photo_url": user.photo_url,
+            "role": user.role,
+            "language": user.language.value if user.language else "Русский",
+            "level": user.level.value if user.level else "Новичок",
+            "city": user.city,
+            "university": user.university,
+            "created_at": user.created_at.isoformat() if user.created_at else None
         }
 
     @staticmethod
     def get_user_by_id(db: Session, user_id: int) -> User:
         return db.query(User).filter(User.id == user_id).first()
+
+    @staticmethod
+    def get_user_by_telegram_id(db: Session, telegram_id: int) -> User:
+        return db.query(User).filter(User.telegram_id == telegram_id).first()
+
+    @staticmethod
+    def update_user_profile(
+            db: Session,
+            user_id: int,
+            name: str = None,
+            role: str = None,
+            language: str = None,
+            level: str = None,
+            city: str = None,
+            university: str = None
+    ) -> dict:
+        user = AuthService.get_user_by_id(db, user_id)
+
+        if not user:
+            return {"success": False, "error": "Пользователь не найден"}
+
+        if name is not None:
+            user.name = name
+        # УБРАЛ блок с last_name
+        if role is not None:
+            user.role = role
+        if language is not None:
+            try:
+                user.language = LanguageEnum(language)
+            except ValueError:
+                return {"success": False, "error": "Некорректное значение языка"}
+        if level is not None:
+            try:
+                user.level = LevelEnum(level)
+            except ValueError:
+                return {"success": False, "error": "Некорректное значение уровня"}
+        if city is not None:
+            user.city = city
+        if university is not None:
+            user.university = university
+
+        db.commit()
+        db.refresh(user)
+
+        return {
+            "success": True,
+            "message": "Профиль обновлен",
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "role": user.role,
+                "language": user.language.value if user.language else None,
+                "level": user.level.value if user.level else None,
+                "city": user.city,
+                "university": user.university
+            }
+        }
+
+    @staticmethod
+    def update_user_photo(db: Session, user_id: int, photo_url: str) -> dict:
+        user = AuthService.get_user_by_id(db, user_id)
+
+        if not user:
+            return {"success": False, "error": "Пользователь не найден"}
+
+        user.photo_url = photo_url
+        db.commit()
+        db.refresh(user)
+
+        return {
+            "success": True,
+            "message": "Фото обновлено",
+            "photo_url": user.photo_url
+        }

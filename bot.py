@@ -1,68 +1,3 @@
-# from telegram import Update
-# from telegram.ext import Application, CommandHandler, ContextTypes
-# from database import SessionLocal, create_tables_if_not_exist
-# from auth_service import AuthService
-# import logging
-#
-# TELEGRAM_BOT_TOKEN = "8504263258:AAGTe1Nn5ceO5YGi4H4f2C98WFIaaWeaZ98"
-#
-# logging.basicConfig(
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     level=logging.INFO
-# )
-#
-# async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     user = update.effective_user
-#     await update.message.reply_text(
-#         f"👋 Привет, {user.first_name or 'друг'}!\n\n"
-#         f"Отправь /code чтобы получить код для входа на сайт.\n"
-#         f"Твой ID: {user.id}"
-#     )
-#
-# async def code(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     user = update.effective_user
-#
-#     db = SessionLocal()
-#     try:
-#         auth_code = AuthService.create_auth_code(
-#             db=db,
-#             telegram_id=user.id,
-#             username=user.username,
-#             first_name=user.first_name
-#         )
-#
-#         login_url = f"http://localhost:8000/auth/telegram?code={auth_code.code}"
-#
-#         await update.message.reply_text(
-#             f"✅ *Код создан!*\n\n"
-#             f"🔐 Код: `{auth_code.code}`\n"
-#             f"⏰ Действует: 5 минут\n\n"
-#             f"🌐 Ссылка для входа:\n{login_url}\n\n"
-#             f"⚠️ Никому не передавай код!",
-#             parse_mode="Markdown"
-#         )
-#         print(f"📱 Код {auth_code.code} для пользователя {user.id}")
-#
-#     except Exception as e:
-#         print(f"❌ Ошибка: {e}")
-#         await update.message.reply_text("❌ Ошибка. Попробуй еще раз.")
-#     finally:
-#         db.close()
-#
-# def main():
-#     create_tables_if_not_exist()
-#
-#     app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-#     app.add_handler(CommandHandler("start", start))
-#     app.add_handler(CommandHandler("code", code))
-#
-#
-#     app.run_polling()
-#
-#
-# if __name__ == "__main__":
-#     main()
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 from database import SessionLocal
@@ -70,14 +5,12 @@ from auth_service import AuthService
 
 TELEGRAM_BOT_TOKEN = "8298815335:AAELJ2jZVSYcFTcxomwqZmuBhqd3_aw3IGU"
 
-
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     await update.message.reply_text(
         f"👋 Привет, {user.first_name or user.username}!\n\n"
         f"Используй команду /code чтобы получить код для входа на сайт."
     )
-
 
 async def code_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
