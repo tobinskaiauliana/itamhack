@@ -10,7 +10,7 @@ services:
     build: /home/itamfm_admin/itamfm-back/
     restart: unless-stopped
     ports:
-      - " 8000:8000"
+      - "8000:8000"
     volumes:
       - "/srv/itamfm/logs:/app/logs"
       - "/srv/itamfm/uploads:/app/uploads"
