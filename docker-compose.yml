@@ -8,7 +8,7 @@ services:
     container_name: itamfm-back
     image: itamfm:latest
     build: /home/itamfm_admin/itamfm-back/
-    restart: unless- stopped
+    restart: unless-stopped
     ports:
       - " 8000:8000"
     volumes:
@@ -16,7 +16,7 @@ services:
       - "/srv/itamfm/uploads:/app/uploads"
     networks:
       - itamfm-net
-    extra hosts:
+    extra_hosts:
       - "host.docker.internal:host-qateway"
     environment:
       - DB_USER=itamfm_adm
