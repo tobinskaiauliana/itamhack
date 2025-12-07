@@ -1,22 +1,26 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, BigInteger, ForeignKey, Text, Float, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, BigInteger, ForeignKey, Text, Float, Enum, \
+    UniqueConstraint
 from sqlalchemy.sql import func
 from database import engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 import enum
 
 Base = declarative_base()
+
 
 class LanguageEnum(str, enum.Enum):
     rus = "Русский"
     eng = "Английский"
     both = "Русский/Английский"
 
+
 class LevelEnum(str, enum.Enum):
     n = "Новичок"
     o = "Опытный"
     p = "Про"
 
-#--------таблицы
+
+# --------таблицы
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -29,6 +33,12 @@ class User(Base):
     level = Column(Enum(LevelEnum), nullable=True, default=LevelEnum.n)
     city = Column(String, nullable=True)
     university = Column(String, nullable=True)
+    about_text = Column(Text, nullable=True)
+    skill1 = Column(String, nullable=True)
+    skill2 = Column(String, nullable=True)
+    skill3 = Column(String, nullable=True)
+    skill4 = Column(String, nullable=True)
+    skill5 = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 
@@ -55,6 +65,7 @@ class TelegramCode(Base):
             expires_at_utc = self.expires_at.astimezone(timezone.utc)
         return now_utc > expires_at_utc
 
+
 class Admin(Base):
     __tablename__ = "admins"
     id = Column(Integer, primary_key=True)
@@ -64,17 +75,54 @@ class Admin(Base):
     role = Column(String, default="admin")
     created_at = Column(DateTime, server_default=func.now())
 
+
 class Hackathon(Base):
     __tablename__ = "hackathons"
     id = Column(Integer, primary_key=True)
     title = Column(String(200), nullable=False)
     description = Column(Text)
-    date = Column(Float, nullable=False)
-    registration_deadline = Column(Float, nullable=True)
+    date = Column(String, nullable=False)
+    registration_deadline = Column(String, nullable=True)
     team_size = Column(Integer, default=0)
     format = Column(String(20), nullable=False)
     photo_url = Column(String, nullable=True)
     created_by = Column(Integer, ForeignKey('admins.id'))
     created_at = Column(DateTime, server_default=func.now())
+    admin = relationship("Admin")
 
-Base.metadata.create_all(bind=engine)
+
+class TeammateRequest(Base):
+    __tablename__ = "teammate_requests"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    user = relationship("User")
+
+class TeamRequest(Base):
+    __tablename__ = "team_requests"
+    id = Column(Integer, primary_key=True)
+    hackathon_id = Column(Integer, ForeignKey('hackathons.id'), nullable=False)
+    team_name = Column(String(200), nullable=False)
+    team_photo_url = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey('users.id'), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    hackathon = relationship("Hackathon")
+    creator = relationship("User")
+
+class TeamMember(Base):
+    __tablename__ = "team_members"
+    id = Column(Integer, primary_key=True)
+    team_request_id = Column(Integer, ForeignKey('team_requests.id'), nullable=False)
+    full_name = Column(String(200), nullable=False)
+    telegram_username = Column(String(100), nullable=False)
+    role = Column(String(100), nullable=False)
+    university = Column(String(200), nullable=True)
+    position = Column(Integer, nullable=False)
+
+    team_request = relationship("TeamRequest")
+

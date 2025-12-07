@@ -1,9 +1,12 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from database import SessionLocal
 from auth_service import AuthService
+from config import TELEGRAM_BOT_TOKEN, PUBLIC_URL
+from telegram.ext import Application
 
-TELEGRAM_BOT_TOKEN = "8298815335:AAELJ2jZVSYcFTcxomwqZmuBhqd3_aw3IGU"
+bot_application = None
+application = None
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -24,7 +27,6 @@ async def code_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             first_name=user.first_name
         )
 
-        PUBLIC_URL = "https://cdcef7fd2f0454.lhr.life" #!!!!!!!!!не забыть поменять
         login_url = f"{PUBLIC_URL}/auth/telegram?code={auth_code.code}"
 
         keyboard = [
@@ -53,6 +55,25 @@ async def code_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         db.close()
 
 
+async def send_telegram_notification(telegram_id: int, message: str):
+    global bot_application
+    try:
+        if not bot_application:
+            from config import TELEGRAM_BOT_TOKEN
+            bot_application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+
+        await bot_application.bot.send_message(
+            chat_id=telegram_id,
+            text=message,
+            parse_mode="Markdown"
+        )
+        print(f"✅ Уведомление отправлено пользователю {telegram_id}")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка отправки уведомления: {e}")
+        return False
+
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "*Доступные команды:*\n\n"
@@ -63,8 +84,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown"
     )
 
-
 def main():
+    global application
+    global bot_application
+    bot_application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start_command))

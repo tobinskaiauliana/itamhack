@@ -102,7 +102,13 @@ class AuthService:
             language: str = None,
             level: str = None,
             city: str = None,
-            university: str = None
+            university: str = None,
+            about_text: str = None,
+            skill1: str = None,
+            skill2: str = None,
+            skill3: str = None,
+            skill4: str = None,
+            skill5: str = None
     ) -> dict:
         user = AuthService.get_user_by_id(db, user_id)
 
@@ -111,7 +117,6 @@ class AuthService:
 
         if name is not None:
             user.name = name
-        # УБРАЛ блок с last_name
         if role is not None:
             user.role = role
         if language is not None:
@@ -128,6 +133,18 @@ class AuthService:
             user.city = city
         if university is not None:
             user.university = university
+        if about_text is not None:
+            user.about_text = about_text
+        if skill1 is not None:
+            user.skill1 = skill1
+        if skill2 is not None:
+            user.skill2 = skill2
+        if skill3 is not None:
+            user.skill3 = skill3
+        if skill4 is not None:
+            user.skill4 = skill4
+        if skill5 is not None:
+            user.skill5 = skill5
 
         db.commit()
         db.refresh(user)
@@ -142,7 +159,13 @@ class AuthService:
                 "language": user.language.value if user.language else None,
                 "level": user.level.value if user.level else None,
                 "city": user.city,
-                "university": user.university
+                "university": user.university,
+                "about_text": user.about_text,
+                "skill1": user.skill1,
+                "skill2": user.skill2,
+                "skill3": user.skill3,
+                "skill4": user.skill4,
+                "skill5": user.skill5
             }
         }
 

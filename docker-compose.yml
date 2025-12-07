@@ -1,14 +1,41 @@
+#version: '3.8'
+#services:
+#  postgres:
+#    image: postgres:15-alpine
+#    environment:
+#      POSTGRES_DB: itamhack
+#      POSTGRES_USER: auth_user
+#      POSTGRES_PASSWORD: auth_password
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#volumes:
+#  postgres_data:
+
 version: '3.8'
+networks:
+  itamfm-net:
+    driver: bridge
+
 services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: itamhack
-      POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: auth_password
+  itamfm-back:
+    container_name: itamfm-back
+    image: itamfm:latest
+    build: /home/itamfm_admin/itamfm-back/
+    restart: unless- stopped
     ports:
-      - "5432:5432"
+      - " 8000:8000"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-volumes:
-  postgres_data:
+      - "/srv/itamfm/logs:/app/logs"
+      - "/srv/itamfm/uploads:/app/uploads"
+    networks:
+      - itamfm-net
+    extra hosts:
+      - "host.docker.internal:host-qateway"
+    environment:
+      - DB_USER=itamfm_adm
+      - DB_PASSWORD=10rmIsAmCied
+      - DB_NAME=itamfm_db
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432

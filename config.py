@@ -1,0 +1,2 @@
+TELEGRAM_BOT_TOKEN = "8298815335:AAELJ2jZVSYcFTcxomwqZmuBhqd3_aw3IGU"
+PUBLIC_URL = "https://cdcef7fd2f0454.lhr.life"
