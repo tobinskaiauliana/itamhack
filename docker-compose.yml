@@ -4,10 +4,10 @@ networks:
     driver: bridge
 
 services:
-  itamfm-back:
-    container_name: itamfm-back
+  itamfm-backend:
+    container_name: itamfm-backend
     image: itamfm:latest
-    build: /home/itamfm_admin/itamfm-back/
+    build: /home/itamfm_admin/itamfm-backend/
     restart: unless-stopped
     ports:
       - "8000:8000"
