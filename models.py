@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, BigInteger, ForeignKey, Text, Float, Enum
 from sqlalchemy.sql import func
 from database import Base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 import enum
 from datetime import datetime
 
@@ -42,14 +42,14 @@ class User(Base):
 
 class TelegramCode(Base):
     __tablename__ = "telegram_codes"
-    id = Column(Integer, primary_key=True)
-    code = Column(String(6), unique=True)
-    telegram_id = Column(BigInteger)
-    telegram_username = Column(String)
-    telegram_first_name = Column(String)
-    is_used = Column(Boolean, default=False)
-    expires_at = Column(DateTime)
-    created_at = Column(DateTime, server_default=func.now())
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    code: Mapped[str] = mapped_column(String(6), unique=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger)
+    telegram_username: Mapped[str] = mapped_column(String)
+    telegram_first_name: Mapped[str] = mapped_column(String)
+    is_used: Mapped[bool] = mapped_column(Boolean, default=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     def is_expired(self):
         """Проверка истечения срока кода"""
