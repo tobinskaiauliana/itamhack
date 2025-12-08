@@ -42,19 +42,25 @@ class User(Base):
 
 class TelegramCode(Base):
     __tablename__ = "telegram_codes"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    code: Mapped[str] = mapped_column(String(6), unique=True)
-    telegram_id: Mapped[int] = mapped_column(BigInteger)
-    telegram_username: Mapped[str] = mapped_column(String)
-    telegram_first_name: Mapped[str] = mapped_column(String)
-    is_used: Mapped[bool] = mapped_column(Boolean, default=False)
-    expires_at: Mapped[datetime] = mapped_column(DateTime)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    id = Column(Integer, primary_key=True)
+    code = Column(String(6), unique=True)
+    telegram_id = Column(BigInteger)
+    telegram_username = Column(String)
+    telegram_first_name = Column(String)
+    is_used = Column(Boolean, default=False)
+    expires_at = Column(DateTime)
+    created_at = Column(DateTime, server_default=func.now())
 
     def is_expired(self):
         if not self.expires_at:
             return True
-        return datetime.now() > self.expires_at
+        from datetime import datetime, timezone
+        now_utc = datetime.now(timezone.utc)
+        if self.expires_at.tzinfo is None:
+            expires_at_utc = self.expires_at.replace(tzinfo=timezone.utc)
+        else:
+            expires_at_utc = self.expires_at.astimezone(timezone.utc)
+        return now_utc > expires_at_utc
 
 
 class Admin(Base):
