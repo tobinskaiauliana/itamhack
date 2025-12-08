@@ -1,11 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, BigInteger, ForeignKey, Text, Float, Enum, \
-    UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, BigInteger, ForeignKey, Text, Float, Enum
 from sqlalchemy.sql import func
-from database import engine
-from sqlalchemy.orm import declarative_base, relationship
+from database import Base
+from sqlalchemy.orm import relationship
 import enum
-
-Base = declarative_base()
+from datetime import datetime
 
 
 class LanguageEnum(str, enum.Enum):
@@ -20,7 +18,6 @@ class LevelEnum(str, enum.Enum):
     p = "Про"
 
 
-# --------таблицы
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -55,15 +52,11 @@ class TelegramCode(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     def is_expired(self):
+        """Проверка истечения срока кода"""
         if not self.expires_at:
             return True
-        from datetime import datetime, timezone
-        now_utc = datetime.now(timezone.utc)
-        if self.expires_at.tzinfo is None:
-            expires_at_utc = self.expires_at.replace(tzinfo=timezone.utc)
-        else:
-            expires_at_utc = self.expires_at.astimezone(timezone.utc)
-        return now_utc > expires_at_utc
+        # Простая проверка - сравниваем с текущим UTC временем
+        return datetime.utcnow() > self.expires_at
 
 
 class Admin(Base):
@@ -100,6 +93,7 @@ class TeammateRequest(Base):
 
     user = relationship("User")
 
+
 class TeamRequest(Base):
     __tablename__ = "team_requests"
     id = Column(Integer, primary_key=True)
@@ -114,6 +108,7 @@ class TeamRequest(Base):
     hackathon = relationship("Hackathon")
     creator = relationship("User")
 
+
 class TeamMember(Base):
     __tablename__ = "team_members"
     id = Column(Integer, primary_key=True)
@@ -125,4 +120,3 @@ class TeamMember(Base):
     position = Column(Integer, nullable=False)
 
     team_request = relationship("TeamRequest")
-

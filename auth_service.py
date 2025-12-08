@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from models import TelegramCode, User, LanguageEnum, LevelEnum
 
@@ -23,7 +23,8 @@ class AuthService:
         ).delete(synchronize_session=False)
 
         code_str = AuthService.generate_code()
-        expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+        # ИСПРАВЛЕНО: используем datetime.utcnow() вместо datetime.now(timezone.utc)
+        expires_at = datetime.utcnow() + timedelta(minutes=5)
 
         auth_code = TelegramCode(
             code=code_str,
