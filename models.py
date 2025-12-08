@@ -52,11 +52,10 @@ class TelegramCode(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     def is_expired(self):
-        """Проверка истечения срока кода"""
         if not self.expires_at:
             return True
-        # Простая проверка - сравниваем с текущим UTC временем
-        return datetime.utcnow() > self.expires_at
+        print("Check:", type(datetime.now()), type(self.expires_at))
+        return datetime.now() > self.expires_at
 
 
 class Admin(Base):
