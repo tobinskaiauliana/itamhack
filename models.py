@@ -54,7 +54,6 @@ class TelegramCode(Base):
     def is_expired(self):
         if not self.expires_at:
             return True
-        print("Check:", type(datetime.now()), type(self.expires_at))
         return datetime.now() > self.expires_at
 
 
